@@ -20,9 +20,16 @@ router
   );
 router.route('/myOrders').get(authController.protect, orderController.myOrders);
 router
+  .route('/driverOrders')
+  .get(authController.protect, orderController.driverOrders);
+router
   .route('/:id/:optional?')
   .get(orderController.getOrder)
-  .patch(authController.protect, orderController.updateOrder)
+  .patch(
+    authController.protect,
+    authController.restrictTo('admin', 'driver'),
+    orderController.updateOrder
+  )
   .delete(orderController.deleteOrder);
 
 module.exports = router;

@@ -30,7 +30,8 @@ const orderSchema = mongoose.Schema(
           'approved',
           'collected',
           'delivered',
-          'deleted'
+          'deleted',
+          'declined'
         ],
         message: 'Invalid status'
       }
@@ -63,14 +64,18 @@ const orderSchema = mongoose.Schema(
       type: mongoose.Schema.ObjectId,
       ref: 'User'
     },
-
+    driver: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User'
+    },
     receiver: String,
     receiverPhone: String,
     imageUri: String
   },
   {
     toJson: { virtuals: true },
-    toObject: { virtuals: true }
+    toObject: { virtuals: true },
+    timestamps: true
   }
 );
 

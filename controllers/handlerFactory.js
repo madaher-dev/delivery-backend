@@ -56,7 +56,6 @@ exports.getOne = (Model, popOptions) =>
     if (!doc) {
       return next(new AppError('No document found with that ID', 404));
     }
-    console.log(doc);
     res.status(200).json({
       status: 'success',
 
@@ -66,26 +65,27 @@ exports.getOne = (Model, popOptions) =>
     });
   });
 
-exports.getAll = Model =>
+exports.getAll = (Model, popOptions) =>
   catchAsync(async (req, res, next) => {
-    // To allow for nested GET reviews on tour (hack)
+    // get reviews for specific tour (nested route hack)
     let filter = {};
-    if (req.params.tourId) filter = { tour: req.params.tourId };
 
+    if (req.params.id) filter = { order: req.params.id };
+
+    // Execute query
     const features = new APIFeatures(Model.find(filter), req.query)
       .filter()
       .sort()
       .limitFields()
       .paginate();
-    // const doc = await features.query.explain();
-    const doc = await features.query;
 
-    // SEND RESPONSE
+    const docs = await features.query.populate(popOptions); //.explain() will show stats about the query;
+    // Send Response
     res.status(200).json({
       status: 'success',
-      results: doc.length,
+      results: docs.length, // number of results
       data: {
-        data: doc
+        data: docs //no need to write tours: tours (ES6)
       }
     });
   });

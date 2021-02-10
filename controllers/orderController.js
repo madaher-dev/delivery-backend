@@ -45,7 +45,7 @@ exports.resizeOrderImages = async (req, res, next) => {
 };
 //CRUD
 
-exports.getAllOrders = factory.getAll(Order);
+exports.getAllOrders = factory.getAll(Order, { path: 'user driver' });
 //exports.getOrder = factory.getOne(Order, { path: 'reviews' }); //reviews is populate option
 exports.getOrder = factory.getOne(Order);
 exports.updateOrder = factory.updateOne(Order);
@@ -55,10 +55,10 @@ exports.createOrder = catchAsync(async (req, res, next) => {
   //console.log(req.body.destinationLocation)
 
   //Build destinationLocation Object
-  if (!req.body.lng) {
+  if (req.body.lng) {
     const coordinates = [];
-    coordinates[0] = req.body.lng;
-    coordinates[1] = req.body.lat;
+    coordinates[0] = req.body.lat;
+    coordinates[1] = req.body.lng;
     const destinationLocation = {};
     destinationLocation.type = 'Point';
     destinationLocation.coordinates = coordinates;
@@ -91,6 +91,25 @@ exports.createOrder = catchAsync(async (req, res, next) => {
 
 exports.myOrders = catchAsync(async (req, res, next) => {
   const features = new APIFeatures(Order.find(), { user: req.user })
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+
+  const filteredOrders = await features.query; //7ikmet rabina
+
+  // Send responce
+  res.status(200).json({
+    status: 'success',
+    results: filteredOrders.length,
+    data: {
+      orders: filteredOrders
+    }
+  });
+});
+
+exports.driverOrders = catchAsync(async (req, res, next) => {
+  const features = new APIFeatures(Order.find(), { driver: req.user })
     .filter()
     .sort()
     .limitFields()
